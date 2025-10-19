@@ -11,6 +11,11 @@ export const metadata: Metadata = {
     description: 'Donde la naturaleza floral se encuentra con cocteles artesanales y sabores únicos',
     type: 'website',
   },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({

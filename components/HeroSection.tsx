@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 const backgrounds = [
   '/images/bar.jpeg',
@@ -10,28 +11,62 @@ const backgrounds = [
 
 const HeroSection = () => {
   const [currentBg, setCurrentBg] = useState(0)
+  const [imagesLoaded, setImagesLoaded] = useState(false)
 
   useEffect(() => {
+    // Precargar todas las imágenes
+    const preloadImages = async () => {
+      const imagePromises = backgrounds.map((src) => {
+        return new Promise((resolve, reject) => {
+          const img = new window.Image()
+          img.src = src
+          img.onload = resolve
+          img.onerror = reject
+        })
+      })
+
+      await Promise.all(imagePromises)
+      setImagesLoaded(true)
+    }
+
+    preloadImages()
+  }, [])
+
+  useEffect(() => {
+    if (!imagesLoaded) return
+
     const interval = setInterval(() => {
       setCurrentBg((prev) => (prev + 1) % backgrounds.length)
     }, 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [imagesLoaded])
 
   return (
-    <section id="inicio" className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section id="inicio" className="relative h-screen flex items-center justify-center overflow-hidden bg-gray-900">
       {backgrounds.map((bg, index) => (
         <motion.div
           key={bg}
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${bg})` }}
-          initial={{ opacity: 0 }}
+          className="absolute inset-0"
+          initial={{ opacity: index === 0 ? 1 : 0 }}
           animate={{ opacity: currentBg === index ? 1 : 0 }}
-          transition={{ duration: 1.5 }}
-        />
+          transition={{
+            duration: 0.8,
+            ease: "easeInOut"
+          }}
+        >
+          <Image
+            src={bg}
+            alt={`Background ${index + 1}`}
+            fill
+            priority={index === 0}
+            quality={90}
+            className="object-cover"
+            sizes="100vw"
+          />
+        </motion.div>
       ))}
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/40" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/40 z-[1]" />
 
       <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl mx-4">
         <motion.div
